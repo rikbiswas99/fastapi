@@ -15,6 +15,15 @@ class Post(BaseModel):
 my_posts = [{"title": "post 1", "content": "content of post 1" ,"id": 1}, {"title": "post 2", "content": "content of post 2",  "id": 2},
             {"title": "post 3", "content": "content of post 3",  "id": 3}]
 
+
+
+
+def find_post(id):
+    for p in my_posts:
+        if p['id'] == id:
+            return p
+        
+
 @app.get("/")
 def get_user():
     return {"message": "Hello Rik"}
@@ -32,4 +41,11 @@ def create_post(post: Post):
 
 
 
-
+@app.get("/posts/{id}")
+def get_post(id: int):
+    post = find_post(id)
+    if not post:
+        return {"error": "post not found"}
+    return {"post_detail": post}
+    
+ 
