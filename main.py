@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI ,Response   ,status ,HTTPException
 from fastapi.params import Body
 from httpx import post
 from pydantic import BaseModel
@@ -14,7 +14,6 @@ class Post(BaseModel):
 
 my_posts = [{"title": "post 1", "content": "content of post 1" ,"id": 1}, {"title": "post 2", "content": "content of post 2",  "id": 2},
             {"title": "post 3", "content": "content of post 3",  "id": 3}]
-
 
 
 
@@ -42,10 +41,12 @@ def create_post(post: Post):
 
 
 @app.get("/posts/{id}")
-def get_post(id: int):
-    post = find_post(id)
-    if not post:
-        return {"error": "post not found"}
-    return {"post_detail": post}
-    
- 
+def get_post(id: int , response: Response):
+   
+   post = find_post(int(id))
+   if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id {id} not found")
+         
+   print = (post)
+   return {"post_detail " :post}
+
