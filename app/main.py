@@ -1,4 +1,4 @@
-from fastapi import FastAPI ,Response   ,status ,HTTPException
+from fastapi import FastAPI ,Response   ,status ,HTTPException ,Depends
 from fastapi.params import Body
 from httpx import post
 import psycopg2
@@ -7,9 +7,15 @@ from typing import Optional
 from random import randrange
 from psycopg2.extras import RealDictCursor
 import time
+from sqlalchemy.orm import Session
+from . import models
+from . databse import  engine, get_db
 
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+ 
+  
 class Post(BaseModel):
     title: str
     content: str
@@ -48,6 +54,24 @@ def find_index_post(id):
 def get_user():
     return {"message": "Hello Rik"}
 
+
+
+
+
+@app.get("/sqlalchemy")
+def test_post(db: Session = Depends(get_db)):
+    # posts = db.query(models.Post).all()
+    return {"message": "successfully connected to database"}
+
+
+
+
+
+
+
+
+
+
 @app.get("/posts")
 def get_posts():
     cursor.execute("""SELECT * FROM posts""")
@@ -85,13 +109,11 @@ def delete_post(id: int):
 
 @app.put("/posts/{id}")
 def update_post(id: int, post: Post): 
-    print(post)
-    index = find_index_post(id)
-    if index == None:
+    cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """, (post.title, post.content, post.published, str(id)))
+    updated_post = cursor.fetchone()
+    conn.commit()
+    if updated_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id {id} not found")
-    post_dict = post.dict()
-    post_dict["id"] = id
-    my_posts[index] = post_dict
-    return {"data": post_dict}
+    return {"data": updated_post}
 
 
