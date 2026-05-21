@@ -54,29 +54,17 @@ def find_index_post(id):
 def get_user():
     return {"message": "Hello Rik"}
 
-
-
-
-
 @app.get("/sqlalchemy")
 def test_post(db: Session = Depends(get_db)):
-    # posts = db.query(models.Post).all()
-    return {"message": "successfully connected to database"}
-
-
-
-
-
-
-
-
-
-
+    posts = db.query(models.Post).all()
+    return {"data": posts}
+ 
 @app.get("/posts")
-def get_posts():
-    cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
+def get_posts( db: Session = Depends(get_db)):
+    # cursor.execute("""SELECT * FROM posts""")
+    # posts = cursor.fetchall()
     # print(posts)
+    posts = db.query(models.Post).all()
     return {"data": posts}
 
 @app.post("/createpost", status_code=status.HTTP_201_CREATED)
